@@ -8,6 +8,9 @@ import Inventory from "../components/character/Inventory";
 import TeamView from "../components/team/TeamView";
 import GmPlayersPanel from "../components/gm/GmPlayersPanel";
 import NpcManager from "../components/gm/NpcManager";
+import MonsterLibrary from "../components/gm/MonsterLibrary";
+import CombatTracker from "../components/combat/CombatTracker";
+import PlayerCombatView from "../components/combat/PlayerCombatView";
 
 interface CampaignPageProps {
   campaignId: string;
@@ -74,7 +77,7 @@ export default function CampaignPage({ campaignId, role, onBack }: CampaignPageP
       case "team":
         return <TeamView campaignId={campaignId} />;
       case "combat":
-        return <p style={{ color: "var(--color-text-muted)" }}>Phase 5 : Combat tracker a venir</p>;
+        return <PlayerCombatView campaignId={campaignId} />;
       default:
         return null;
     }
@@ -87,9 +90,9 @@ export default function CampaignPage({ campaignId, role, onBack }: CampaignPageP
       case "npcs":
         return <NpcManager campaignId={campaignId} />;
       case "combat":
-        return <p style={{ color: "var(--color-text-muted)" }}>Phase 5 : Gestion combat a venir</p>;
+        return <CombatTracker campaignId={campaignId} />;
       case "monsters":
-        return <p style={{ color: "var(--color-text-muted)" }}>Phase 5 : Bibliotheque monstres a venir</p>;
+        return <MonsterLibrary />;
       case "campaign":
         return <CampaignConfig campaignId={campaignId} campaignMode={campaignMode} />;
       default:
