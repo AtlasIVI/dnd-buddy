@@ -1,167 +1,153 @@
-import { useState, useEffect, useCallback } from "react";
-import { supabase } from "../../lib/supabase";
+import { useState, useEffect, useCallback } from 'react';
+import { supabase } from '../../lib/supabase';
+import type { Tables } from '../../types/database';
+import { GiBackpack, GiEyeTarget, GiShield } from 'react-icons/gi';
 
-interface Item {
-  id: string;
-  character_id: string;
-  name: string;
-  description: string;
-  quantity: number;
-  is_equipped: boolean;
-  is_hidden: boolean;
-  sort_order: number;
-}
-
-interface Props {
+interface InventoryProps {
   characterId: string;
   canEdit: boolean;
 }
 
-export default function Inventory({ characterId, canEdit }: Props) {
-  const [items, setItems] = useState<Item[]>([]);
-  const [showNew, setShowNew] = useState(false);
-  const [newItem, setNewItem] = useState({ name: "", description: "", quantity: 1 });
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editData, setEditData] = useState({ name: "", description: "", quantity: 1 });
+export default function Inventory({ characterId, canEdit }: InventoryProps) {
+  const [items, setItems] = useState<Tables<'inventory_items'>[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [newItem, setNewItem] = useState({ name: '', description: '', quantity: 1, is_equipped: false, is_hidden: false });
 
   const fetchItems = useCallback(async () => {
-    const { data } = await supabase.from("inventory_items").select("*").eq("character_id", characterId).order("is_equipped", { ascending: false }).order("sort_order");
-    if (data) setItems(data as Item[]);
+    const { data } = await supabase.from('inventory_items').select('*').eq('character_id', characterId).order('sort_order');
+    if (data) setItems(data);
+    setLoading(false);
   }, [characterId]);
 
   useEffect(() => { fetchItems(); }, [fetchItems]);
+
   useEffect(() => {
-    const ch = supabase.channel("inv-" + characterId)
-      .on("postgres_changes", { event: "*", schema: "public", table: "inventory_items", filter: "character_id=eq." + characterId }, () => fetchItems())
+    const channel = supabase.channel('inv-' + characterId)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'inventory_items', filter: 'character_id=eq.' + characterId }, () => fetchItems())
       .subscribe();
-    return () => { supabase.removeChannel(ch); };
+    return () => { supabase.removeChannel(channel); };
   }, [characterId, fetchItems]);
 
   async function addItem() {
     if (!newItem.name.trim()) return;
-    await supabase.from("inventory_items").insert({ character_id: characterId, ...newItem, sort_order: items.length });
-    setNewItem({ name: "", description: "", quantity: 1 });
-    setShowNew(false);
+    const maxOrder = items.length > 0 ? Math.max(...items.map(i => i.sort_order)) + 1 : 0;
+    await supabase.from('inventory_items').insert({ character_id: characterId, ...newItem, sort_order: maxOrder });
+    setNewItem({ name: '', description: '', quantity: 1, is_equipped: false, is_hidden: false });
+    setShowForm(false);
     fetchItems();
   }
 
-  async function updateItem(id: string) {
-    await supabase.from("inventory_items").update(editData).eq("id", id);
-    setEditingId(null);
-    fetchItems();
-  }
-
-  async function toggleEquipped(item: Item) {
-    await supabase.from("inventory_items").update({ is_equipped: !item.is_equipped }).eq("id", item.id);
-    fetchItems();
-  }
-
-  async function toggleHidden(item: Item) {
-    await supabase.from("inventory_items").update({ is_hidden: !item.is_hidden }).eq("id", item.id);
-    fetchItems();
-  }
-
-  async function changeQty(item: Item, delta: number) {
-    const newQty = Math.max(0, item.quantity + delta);
-    if (newQty === 0) {
-      await supabase.from("inventory_items").delete().eq("id", item.id);
-    } else {
-      await supabase.from("inventory_items").update({ quantity: newQty }).eq("id", item.id);
-    }
-    fetchItems();
-  }
-
-  async function deleteItem(id: string) {
-    await supabase.from("inventory_items").delete().eq("id", id);
+  async function removeItem(id: string) {
+    await supabase.from('inventory_items').delete().eq('id', id);
     setItems(items.filter(i => i.id !== id));
   }
 
-  const equipped = items.filter(i => i.is_equipped);
-  const stored = items.filter(i => !i.is_equipped);
-
-  function renderItem(item: Item) {
-    if (editingId === item.id) {
-      return (
-        <div key={item.id} className="card animate-fade-in" style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-          <input className="input" value={editData.name} onChange={e => setEditData({ ...editData, name: e.target.value })} autoFocus />
-          <div style={{ display: "flex", gap: "0.5rem" }}>
-            <input className="input" type="number" value={editData.quantity} onChange={e => setEditData({ ...editData, quantity: parseInt(e.target.value) || 1 })} style={{ width: "4rem", fontFamily: "var(--font-mono)" }} min={1} />
-            <input className="input" placeholder="Description" value={editData.description} onChange={e => setEditData({ ...editData, description: e.target.value })} style={{ flex: 1 }} />
-          </div>
-          <div style={{ display: "flex", gap: "0.5rem" }}>
-            <button className="btn btn--primary" onClick={() => updateItem(item.id)} style={{ flex: 1 }}>Sauver</button>
-            <button className="btn btn--ghost" onClick={() => setEditingId(null)}>Annuler</button>
-          </div>
-        </div>
-      );
-    }
-    return (
-      <div key={item.id} className="card" style={{ position: "relative" }}>
-        {item.is_hidden && <span className="badge badge--hidden" style={{ position: "absolute", top: "0.5rem", right: "0.5rem", fontSize: "0.625rem" }}>Cache</span>}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-            {item.is_equipped && <span style={{ color: "var(--color-accent)", fontSize: "0.875rem" }}>&#9733;</span>}
-            <span style={{ fontWeight: 600, fontSize: "0.9375rem" }}>{item.name}</span>
-            {item.quantity > 1 && <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.8125rem", color: "var(--color-text-muted)" }}>x{item.quantity}</span>}
-          </div>
-          {canEdit && (
-            <div style={{ display: "flex", gap: "0.25rem", alignItems: "center" }}>
-              <button className="btn btn--ghost" onClick={() => changeQty(item, -1)} style={{ padding: "0.125rem 0.375rem", fontSize: "0.875rem", fontFamily: "var(--font-mono)" }}>-</button>
-              <button className="btn btn--ghost" onClick={() => changeQty(item, 1)} style={{ padding: "0.125rem 0.375rem", fontSize: "0.875rem", fontFamily: "var(--font-mono)" }}>+</button>
-            </div>
-          )}
-        </div>
-        {item.description && <p style={{ fontSize: "0.8125rem", color: "var(--color-text-secondary)", marginTop: "0.25rem" }}>{item.description}</p>}
-        {canEdit && (
-          <div style={{ display: "flex", gap: "0.375rem", marginTop: "0.5rem" }}>
-            <button className="btn btn--ghost" onClick={() => toggleEquipped(item)} style={{ fontSize: "0.6875rem" }}>{item.is_equipped ? "Ranger" : "Equiper"}</button>
-            <button className="btn btn--ghost" onClick={() => toggleHidden(item)} style={{ fontSize: "0.6875rem" }}>{item.is_hidden ? "Montrer" : "Cacher"}</button>
-            <button className="btn btn--ghost" onClick={() => { setEditingId(item.id); setEditData({ name: item.name, description: item.description, quantity: item.quantity }); }} style={{ fontSize: "0.6875rem" }}>Editer</button>
-            <button className="btn btn--ghost" onClick={() => deleteItem(item.id)} style={{ fontSize: "0.6875rem", color: "var(--color-error)" }}>Suppr.</button>
-          </div>
-        )}
-      </div>
-    );
+  async function toggleEquipped(item: Tables<'inventory_items'>) {
+    await supabase.from('inventory_items').update({ is_equipped: !item.is_equipped }).eq('id', item.id);
+    fetchItems();
   }
 
+  async function toggleHidden(item: Tables<'inventory_items'>) {
+    await supabase.from('inventory_items').update({ is_hidden: !item.is_hidden }).eq('id', item.id);
+    fetchItems();
+  }
+
+  async function updateQuantity(item: Tables<'inventory_items'>, qty: number) {
+    const newQty = Math.max(0, qty);
+    await supabase.from('inventory_items').update({ quantity: newQty }).eq('id', item.id);
+    fetchItems();
+  }
+
+  if (loading) return <p style={{ color: 'var(--color-text-muted)' }}>Chargement...</p>;
+
+  const equipped = items.filter(i => i.is_equipped);
+  const unequipped = items.filter(i => !i.is_equipped);
+
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <h2 style={{ fontSize: "1.25rem" }}>Inventaire</h2>
-        {canEdit && <button className="btn btn--ghost" onClick={() => setShowNew(!showNew)} style={{ fontSize: "0.8125rem" }}>{showNew ? "Annuler" : "+ Ajouter"}</button>}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <GiBackpack size={20} style={{ color: 'var(--color-accent)' }} />
+          <h2 style={{ fontSize: '1.25rem' }}>Inventaire ({items.length})</h2>
+        </div>
+        {canEdit && <button className="btn btn--ghost" onClick={() => setShowForm(!showForm)} style={{ fontSize: '0.75rem' }}>{showForm ? 'Annuler' : '+ Objet'}</button>}
       </div>
 
-      {showNew && (
-        <div className="card animate-fade-in" style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-          <input className="input" placeholder="Nom de l objet" value={newItem.name} onChange={e => setNewItem({ ...newItem, name: e.target.value })} autoFocus />
-          <div style={{ display: "flex", gap: "0.5rem" }}>
-            <input className="input" type="number" placeholder="Qte" value={newItem.quantity} onChange={e => setNewItem({ ...newItem, quantity: parseInt(e.target.value) || 1 })} style={{ width: "4rem", fontFamily: "var(--font-mono)" }} min={1} />
-            <input className="input" placeholder="Description (optionnel)" value={newItem.description} onChange={e => setNewItem({ ...newItem, description: e.target.value })} style={{ flex: 1 }} />
+      {showForm && canEdit && (
+        <div className="card animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '0.375rem' }}>
+          <input className="input" placeholder="Nom de l'objet" value={newItem.name} onChange={(e) => setNewItem({ ...newItem, name: e.target.value })} />
+          <input className="input" placeholder="Description (optionnel)" value={newItem.description} onChange={(e) => setNewItem({ ...newItem, description: e.target.value })} />
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+              <label style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>Qte</label>
+              <input className="input" type="number" min={0} value={newItem.quantity} onChange={(e) => setNewItem({ ...newItem, quantity: Math.max(0, parseInt(e.target.value) || 0) })} style={{ width: '4rem', textAlign: 'center' }} />
+            </div>
+            <button className={newItem.is_equipped ? 'btn btn--primary' : 'btn btn--ghost'} onClick={() => setNewItem({ ...newItem, is_equipped: !newItem.is_equipped })} style={{ fontSize: '0.75rem' }}>
+              <GiShield size={14} /> {newItem.is_equipped ? 'Equipe' : 'Non equipe'}
+            </button>
+            <button className={newItem.is_hidden ? 'btn btn--secondary' : 'btn btn--ghost'} onClick={() => setNewItem({ ...newItem, is_hidden: !newItem.is_hidden })} style={{ fontSize: '0.75rem' }}>
+              <GiEyeTarget size={14} /> {newItem.is_hidden ? 'Cache' : 'Visible'}
+            </button>
           </div>
           <button className="btn btn--primary" onClick={addItem} disabled={!newItem.name.trim()}>Ajouter</button>
         </div>
       )}
 
-      {items.length === 0 && !showNew ? (
-        <div className="card" style={{ textAlign: "center", padding: "1.5rem" }}>
-          <p style={{ color: "var(--color-text-muted)", fontSize: "0.8125rem" }}>Inventaire vide</p>
+      {items.length === 0 ? (
+        <div className="card" style={{ textAlign: 'center', padding: '1.5rem' }}>
+          <GiBackpack size={24} style={{ color: 'var(--color-text-muted)', marginBottom: '0.5rem' }} />
+          <p style={{ color: 'var(--color-text-muted)', fontSize: '0.8125rem' }}>Sac vide</p>
         </div>
       ) : (
         <>
           {equipped.length > 0 && (
             <>
-              <p style={{ fontSize: "0.75rem", color: "var(--color-accent)", textTransform: "uppercase", letterSpacing: "0.05em" }}>Equipe</p>
-              {equipped.map(renderItem)}
+              <p style={{ fontSize: '0.6875rem', color: 'var(--color-accent)', textTransform: 'uppercase', letterSpacing: '0.05em' }}><GiShield size={12} style={{ marginRight: '0.25rem' }} />Equipe</p>
+              {equipped.map(item => <ItemRow key={item.id} item={item} canEdit={canEdit} onRemove={removeItem} onToggleEquipped={toggleEquipped} onToggleHidden={toggleHidden} onUpdateQty={updateQuantity} />)}
             </>
           )}
-          {stored.length > 0 && (
+          {unequipped.length > 0 && (
             <>
-              <p style={{ fontSize: "0.75rem", color: "var(--color-text-muted)", textTransform: "uppercase", letterSpacing: "0.05em" }}>{equipped.length > 0 ? "Sac" : ""}</p>
-              {stored.map(renderItem)}
+              {equipped.length > 0 && <p style={{ fontSize: '0.6875rem', color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginTop: '0.25rem' }}><GiBackpack size={12} style={{ marginRight: '0.25rem' }} />Dans le sac</p>}
+              {unequipped.map(item => <ItemRow key={item.id} item={item} canEdit={canEdit} onRemove={removeItem} onToggleEquipped={toggleEquipped} onToggleHidden={toggleHidden} onUpdateQty={updateQuantity} />)}
             </>
           )}
         </>
       )}
+    </div>
+  );
+}
+
+function ItemRow({ item, canEdit, onRemove, onToggleEquipped, onToggleHidden, onUpdateQty }: {
+  item: Tables<'inventory_items'>; canEdit: boolean;
+  onRemove: (id: string) => void; onToggleEquipped: (i: Tables<'inventory_items'>) => void;
+  onToggleHidden: (i: Tables<'inventory_items'>) => void; onUpdateQty: (i: Tables<'inventory_items'>, q: number) => void;
+}) {
+  return (
+    <div className="card" style={{ padding: '0.5rem 0.75rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ flex: 1 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', flexWrap: 'wrap' }}>
+            <span style={{ fontWeight: 600, fontSize: '0.875rem' }}>{item.name}</span>
+            {item.quantity > 1 && <span className="badge badge--player" style={{ fontSize: '0.625rem' }}>x{item.quantity}</span>}
+            {item.is_hidden && <span className="badge badge--hidden" style={{ fontSize: '0.5625rem' }}>cache</span>}
+          </div>
+          {item.description && <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', marginTop: '0.125rem' }}>{item.description}</p>}
+        </div>
+        {canEdit && (
+          <div style={{ display: 'flex', gap: '0.25rem', alignItems: 'center' }}>
+            <input type="number" min={0} className="input" value={item.quantity} onChange={(e) => onUpdateQty(item, parseInt(e.target.value) || 0)} style={{ width: '3rem', textAlign: 'center', padding: '0.125rem', fontSize: '0.75rem' }} />
+            <button className="btn btn--ghost" onClick={() => onToggleEquipped(item)} style={{ padding: '0.125rem 0.25rem', fontSize: '0.6875rem', color: item.is_equipped ? 'var(--color-accent)' : 'var(--color-text-muted)' }}>
+              <GiShield size={14} />
+            </button>
+            <button className="btn btn--ghost" onClick={() => onToggleHidden(item)} style={{ padding: '0.125rem 0.25rem', fontSize: '0.6875rem' }}>
+              <GiEyeTarget size={14} />
+            </button>
+            <button className="btn btn--ghost" onClick={() => onRemove(item.id)} style={{ padding: '0.125rem 0.25rem', color: 'var(--color-error)' }}>X</button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
