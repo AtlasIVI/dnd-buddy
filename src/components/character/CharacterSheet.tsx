@@ -1,6 +1,19 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "../../lib/supabase";
 import { useAuth } from "../../contexts/AuthContext";
+// 1. Importation des icônes RPG
+import {
+  GiHearts,
+  GiShield,
+  GiLeatherBoot,
+  GiBroadsword,
+  GiHealthPotion,
+  GiSparkles,
+  GiStarMedal,
+  GiMagicSwirl,
+  GiQuillInk,
+  GiFist
+} from "react-icons/gi";
 
 interface Character {
   id: string;
@@ -201,7 +214,7 @@ export default function CharacterSheet({ campaignId, isGM, targetUserId }: Props
             </div>
           </div>
           <div className="stat-block" style={{ backgroundColor: "var(--color-background-alt)", borderRadius: "var(--card-radius)", padding: "0.375rem 0.75rem" }}>
-            <span className="stat-block__label">Niveau</span>
+            <span className="stat-block__label" style={{ display: "flex", alignItems: "center", gap: "0.25rem", justifyContent: "center" }}><GiStarMedal /> Niveau</span>
             {editing === "level" ? (
               <input className="input" type="number" value={editValue} onChange={e => setEditValue(e.target.value)} autoFocus onBlur={() => confirmEdit("level", true)} onKeyDown={e => e.key === "Enter" && confirmEdit("level", true)} style={{ width: "3rem", textAlign: "center", fontFamily: "var(--font-mono)", fontSize: "1.25rem", padding: "0.125rem" }} />
             ) : (
@@ -213,7 +226,7 @@ export default function CharacterSheet({ campaignId, isGM, targetUserId }: Props
         {/* XP bar */}
         <div style={{ marginTop: "0.75rem" }}>
           <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.75rem", marginBottom: "0.25rem" }}>
-            <span style={{ color: "var(--color-text-muted)" }}>XP</span>
+            <span style={{ color: "var(--color-text-muted)", display: "flex", alignItems: "center", gap: "0.25rem" }}><GiSparkles /> XP</span>
             {editing === "xp" ? (
               <input className="input" type="number" value={editValue} onChange={e => setEditValue(e.target.value)} autoFocus onBlur={() => confirmEdit("xp", true)} onKeyDown={e => e.key === "Enter" && confirmEdit("xp", true)} style={{ width: "5rem", textAlign: "right", fontSize: "0.75rem", padding: "0.125rem 0.375rem" }} />
             ) : (
@@ -226,7 +239,9 @@ export default function CharacterSheet({ campaignId, isGM, targetUserId }: Props
       {/* HP + AC + Speed */}
       <div className="card">
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
-          <span style={{ fontSize: "0.875rem", color: "var(--color-text-secondary)" }}>Points de Vie</span>
+          <span style={{ fontSize: "0.875rem", color: "var(--color-text-secondary)", display: "flex", alignItems: "center", gap: "0.375rem" }}>
+            <GiHearts size={16} style={{ color: "var(--color-hp)" }} /> Points de Vie
+          </span>
           <span style={{ fontFamily: "var(--font-mono)", fontSize: "1.125rem", color: hpColor }}>
             {char.hp_current} / {editing === "hp_max" ? (
               <input className="input" type="number" value={editValue} onChange={e => setEditValue(e.target.value)} autoFocus onBlur={() => confirmEdit("hp_max", true)} onKeyDown={e => e.key === "Enter" && confirmEdit("hp_max", true)} style={{ width: "3.5rem", display: "inline", textAlign: "center", fontSize: "1.125rem", padding: "0" }} />
@@ -240,14 +255,18 @@ export default function CharacterSheet({ campaignId, isGM, targetUserId }: Props
         </div>
         {canEdit && (
           <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.75rem", alignItems: "center" }}>
-            <button className="btn btn--danger" style={{ padding: "0.375rem 0.625rem", fontSize: "0.8125rem" }} onClick={() => { const d = parseInt(hpDelta) || 1; applyHpChange(-d); }}>-Degats</button>
+            <button className="btn btn--danger" style={{ padding: "0.375rem 0.625rem", fontSize: "0.8125rem", display: "flex", alignItems: "center", gap: "0.25rem" }} onClick={() => { const d = parseInt(hpDelta) || 1; applyHpChange(-d); }}>
+              <GiBroadsword /> Dégâts
+            </button>
             <input className="input" type="number" placeholder="Valeur" value={hpDelta} onChange={e => setHpDelta(e.target.value)} style={{ width: "4.5rem", textAlign: "center", fontFamily: "var(--font-mono)" }} onKeyDown={e => { if (e.key === "Enter") { const d = parseInt(hpDelta) || 1; applyHpChange(-d); } }} />
-            <button className="btn" style={{ padding: "0.375rem 0.625rem", fontSize: "0.8125rem", backgroundColor: "var(--color-healing)", color: "#fff" }} onClick={() => { const d = parseInt(hpDelta) || 1; applyHpChange(d); }}>+Soin</button>
+            <button className="btn" style={{ padding: "0.375rem 0.625rem", fontSize: "0.8125rem", backgroundColor: "var(--color-healing)", color: "#fff", display: "flex", alignItems: "center", gap: "0.25rem" }} onClick={() => { const d = parseInt(hpDelta) || 1; applyHpChange(d); }}>
+              <GiHealthPotion /> Soin
+            </button>
           </div>
         )}
         <div style={{ display: "flex", gap: "1rem", marginTop: "1rem", justifyContent: "center" }}>
           <div className="stat-block" style={{ backgroundColor: "var(--color-background-alt)", borderRadius: "var(--card-radius)" }}>
-            <span className="stat-block__label">CA</span>
+            <span className="stat-block__label" style={{ display: "flex", alignItems: "center", gap: "0.25rem", justifyContent: "center" }}><GiShield size={14} style={{ color: "var(--color-armor-class)" }} /> CA</span>
             {editing === "armor_class" ? (
               <input className="input" type="number" value={editValue} onChange={e => setEditValue(e.target.value)} autoFocus onBlur={() => confirmEdit("armor_class", true)} onKeyDown={e => e.key === "Enter" && confirmEdit("armor_class", true)} style={{ width: "3rem", textAlign: "center", fontFamily: "var(--font-mono)", fontSize: "1.25rem", padding: "0.125rem" }} />
             ) : (
@@ -255,7 +274,7 @@ export default function CharacterSheet({ campaignId, isGM, targetUserId }: Props
             )}
           </div>
           <div className="stat-block" style={{ backgroundColor: "var(--color-background-alt)", borderRadius: "var(--card-radius)" }}>
-            <span className="stat-block__label">Vitesse</span>
+            <span className="stat-block__label" style={{ display: "flex", alignItems: "center", gap: "0.25rem", justifyContent: "center" }}><GiLeatherBoot size={14} /> Vitesse</span>
             {editing === "speed" ? (
               <input className="input" type="number" value={editValue} onChange={e => setEditValue(e.target.value)} autoFocus onBlur={() => confirmEdit("speed", true)} onKeyDown={e => e.key === "Enter" && confirmEdit("speed", true)} style={{ width: "3rem", textAlign: "center", fontFamily: "var(--font-mono)", fontSize: "1.25rem", padding: "0.125rem" }} />
             ) : (
@@ -267,7 +286,9 @@ export default function CharacterSheet({ campaignId, isGM, targetUserId }: Props
 
       {/* Ability Scores */}
       <div className="card">
-        <h3 style={{ fontSize: "0.9375rem", marginBottom: "0.75rem", color: "var(--color-text-secondary)" }}>Caracteristiques</h3>
+        <h3 style={{ fontSize: "0.9375rem", marginBottom: "0.75rem", color: "var(--color-text-secondary)", display: "flex", alignItems: "center", gap: "0.375rem" }}>
+          <GiFist size={16} /> Caractéristiques
+        </h3>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "0.5rem" }}>
           {ABILITIES.map(({ key, label }) => (
             <div key={key} className="stat-block" style={{ backgroundColor: "var(--color-background-alt)", borderRadius: "var(--card-radius)", border: "1px solid var(--color-border)" }}>
@@ -288,7 +309,9 @@ export default function CharacterSheet({ campaignId, isGM, targetUserId }: Props
       {/* Effects */}
       <div className="card">
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.75rem" }}>
-          <h3 style={{ fontSize: "0.9375rem", color: "var(--color-text-secondary)" }}>Effets actifs</h3>
+          <h3 style={{ fontSize: "0.9375rem", color: "var(--color-text-secondary)", display: "flex", alignItems: "center", gap: "0.375rem" }}>
+            <GiMagicSwirl size={16} /> Effets actifs
+          </h3>
           {canEdit && <button className="btn btn--ghost" onClick={() => setShowNewEffect(!showNewEffect)} style={{ fontSize: "0.75rem" }}>{showNewEffect ? "Annuler" : "+ Ajouter"}</button>}
         </div>
         {showNewEffect && (
@@ -323,11 +346,13 @@ export default function CharacterSheet({ campaignId, isGM, targetUserId }: Props
       {/* Notes */}
       {(userId === user?.id) && (
         <div className="card">
-          <h3 style={{ fontSize: "0.9375rem", marginBottom: "0.5rem", color: "var(--color-text-secondary)" }}>Notes personnelles</h3>
+          <h3 style={{ fontSize: "0.9375rem", marginBottom: "0.5rem", color: "var(--color-text-secondary)", display: "flex", alignItems: "center", gap: "0.375rem" }}>
+            <GiQuillInk size={16} /> Notes personnelles
+          </h3>
           <textarea
             className="input"
             rows={4}
-            placeholder="Notes privees..."
+            placeholder="Notes privées..."
             value={char.notes}
             onChange={e => setChar({ ...char, notes: e.target.value })}
             onBlur={() => updateField("notes", char.notes)}

@@ -6,7 +6,7 @@ import { applyThemeToElement } from '../themes/theme-css';
 
 type CampaignMode = 'exploration' | 'combat';
 
-interface ThemeContextType {
+export interface ThemeContextType {
   theme: AppTheme;
   themeName: string;
   mode: CampaignMode;

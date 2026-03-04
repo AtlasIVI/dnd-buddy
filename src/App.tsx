@@ -2,6 +2,7 @@ import { useState } from "react";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { CampaignProvider } from "./contexts/CampaignContext";
+import Layout from "./components/layout/Layout";
 import LoginPage from "./pages/LoginPage";
 import HubPage from "./pages/HubPage";
 import CampaignPage from "./pages/CampaignPage";
@@ -15,9 +16,22 @@ function AppContent() {
   const [role, setRole] = useState<"gm" | "player">("player");
 
   if (loading) return (<div className="app-shell" style={{ justifyContent: "center", alignItems: "center" }}><h1 style={{ color: "var(--color-accent)" }}>DnD Buddy</h1></div>);
-  if (!user) return <LoginPage />;
-  if (view === "campaign" && campaignId) return <CampaignPage campaignId={campaignId} role={role} onBack={() => { setView("hub"); setCampaignId(null); }} />;
-  return <HubPage onEnterCampaign={(id: string, r: "gm" | "player") => { setCampaignId(id); setRole(r); setView("campaign"); }} />;
+  
+  if (!user) return <Layout showHeader={false}><LoginPage /></Layout>;
+  
+  if (view === "campaign" && campaignId) {
+    return (
+      <Layout>
+        <CampaignPage campaignId={campaignId} role={role} onBack={() => { setView("hub"); setCampaignId(null); }} />
+      </Layout>
+    );
+  }
+  
+  return (
+    <Layout>
+      <HubPage onEnterCampaign={(id: string, r: "gm" | "player") => { setCampaignId(id); setRole(r); setView("campaign"); }} />
+    </Layout>
+  );
 }
 
 export default function App() {
