@@ -3,6 +3,18 @@ import { supabase } from "../../lib/supabase";
 import { useAuth } from "../../contexts/AuthContext";
 import MonsterLibrary from "../gm/MonsterLibrary";
 
+// 1. Importation des icônes RPG
+import {
+  GiBroadsword,
+  GiSundial,
+  GiShield,
+  GiHearts,
+  GiCrestedHelmet,
+  GiWolfHead,
+  GiCharacter,
+  GiDeathSkull
+} from "react-icons/gi";
+
 interface Participant {
   id: string;
   combat_id: string;
@@ -243,11 +255,15 @@ export default function CombatTracker({ campaignId }: Props) {
   if (!combat) {
     return (
       <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-        <h2 style={{ fontSize: "1.25rem" }}>Combat</h2>
+        <h2 style={{ fontSize: "1.25rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <GiBroadsword /> Combat
+        </h2>
         <div className="card" style={{ textAlign: "center", padding: "2rem" }}>
           <p style={{ color: "var(--color-text-muted)", marginBottom: "1rem" }}>Aucun combat en cours</p>
           <input className="input" placeholder="Nom du combat" value={combatName} onChange={e => setCombatName(e.target.value)} style={{ marginBottom: "0.75rem", textAlign: "center" }} />
-          <button className="btn btn--danger" onClick={startCombat} style={{ width: "100%" }}>Lancer le combat</button>
+          <button className="btn btn--danger" onClick={startCombat} style={{ width: "100%", display: "flex", justifyContent: "center", alignItems: "center", gap: "0.5rem" }}>
+            <GiBroadsword /> Lancer le combat
+          </button>
           <p style={{ fontSize: "0.75rem", color: "var(--color-text-muted)", marginTop: "0.5rem" }}>Tous les joueurs et PNJ actifs seront ajoutes automatiquement.</p>
         </div>
       </div>
@@ -262,7 +278,9 @@ export default function CombatTracker({ campaignId }: Props) {
     <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
       {/* Combat header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <h2 style={{ fontSize: "1.25rem", color: "var(--color-error)" }}>{combat.name}</h2>
+        <h2 style={{ fontSize: "1.25rem", color: "var(--color-error)", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <GiBroadsword /> {combat.name}
+        </h2>
         <button className="btn btn--ghost" onClick={endCombat} style={{ fontSize: "0.75rem", color: "var(--color-error)" }}>Fin du combat</button>
       </div>
 
@@ -270,8 +288,10 @@ export default function CombatTracker({ campaignId }: Props) {
       <div className="card" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0.5rem 0.75rem" }}>
         <button className="btn btn--ghost" onClick={prevTurn} style={{ fontSize: "1.25rem", padding: "0.25rem 0.5rem" }}>&lt;</button>
         <div style={{ textAlign: "center" }}>
-          <p style={{ fontSize: "0.6875rem", color: "var(--color-text-muted)", textTransform: "uppercase" }}>Tour actuel</p>
-          <p style={{ fontSize: "1.125rem", fontWeight: 600, color: "var(--color-accent)" }}>
+          <p style={{ fontSize: "0.6875rem", color: "var(--color-text-muted)", textTransform: "uppercase", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.25rem" }}>
+            <GiSundial /> Tour actuel
+          </p>
+          <p style={{ fontSize: "1.125rem", fontWeight: 600, color: "var(--color-accent)", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.375rem" }}>
             {activeParticipants[combat.current_turn_index ?? 0]?.display_name || "—"}
           </p>
         </div>
@@ -280,8 +300,12 @@ export default function CombatTracker({ campaignId }: Props) {
 
       {/* Add buttons */}
       <div style={{ display: "flex", gap: "0.5rem" }}>
-        <button className="btn btn--ghost" onClick={() => { setShowMonsters(!showMonsters); setAddManual(false); }} style={{ flex: 1, fontSize: "0.75rem" }}>{showMonsters ? "Fermer bestiaire" : "+ Monstre"}</button>
-        <button className="btn btn--ghost" onClick={() => { setAddManual(!addManual); setShowMonsters(false); }} style={{ flex: 1, fontSize: "0.75rem" }}>{addManual ? "Annuler" : "+ Manuel"}</button>
+        <button className="btn btn--ghost" onClick={() => { setShowMonsters(!showMonsters); setAddManual(false); }} style={{ flex: 1, fontSize: "0.75rem", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.25rem" }}>
+          <GiWolfHead /> {showMonsters ? "Fermer bestiaire" : "Monstre"}
+        </button>
+        <button className="btn btn--ghost" onClick={() => { setAddManual(!addManual); setShowMonsters(false); }} style={{ flex: 1, fontSize: "0.75rem" }}>
+          {addManual ? "Annuler" : "+ Manuel"}
+        </button>
       </div>
 
       {showMonsters && (
@@ -294,12 +318,12 @@ export default function CombatTracker({ campaignId }: Props) {
         <div className="card animate-fade-in" style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
           <input className="input" placeholder="Nom" value={manualEntry.name} onChange={e => setManualEntry({ ...manualEntry, name: e.target.value })} autoFocus />
           <div style={{ display: "flex", gap: "0.5rem" }}>
-            <div style={{ flex: 1 }}><label style={{ fontSize: "0.6875rem", color: "var(--color-text-muted)" }}>PV</label><input className="input" type="number" value={manualEntry.hp} onChange={e => setManualEntry({ ...manualEntry, hp: parseInt(e.target.value) || 1 })} style={{ fontFamily: "var(--font-mono)" }} /></div>
-            <div style={{ flex: 1 }}><label style={{ fontSize: "0.6875rem", color: "var(--color-text-muted)" }}>CA</label><input className="input" type="number" value={manualEntry.ac} onChange={e => setManualEntry({ ...manualEntry, ac: parseInt(e.target.value) || 10 })} style={{ fontFamily: "var(--font-mono)" }} /></div>
+            <div style={{ flex: 1 }}><label style={{ fontSize: "0.6875rem", color: "var(--color-text-muted)", display: "flex", alignItems: "center", gap: "0.25rem" }}><GiHearts /> PV</label><input className="input" type="number" min={0} value={manualEntry.hp} onChange={e => setManualEntry({ ...manualEntry, hp: parseInt(e.target.value) || 1 })} style={{ fontFamily: "var(--font-mono)" }} /></div>
+            <div style={{ flex: 1 }}><label style={{ fontSize: "0.6875rem", color: "var(--color-text-muted)", display: "flex", alignItems: "center", gap: "0.25rem" }}><GiShield /> CA</label><input className="input" type="number" min={0} value={manualEntry.ac} onChange={e => setManualEntry({ ...manualEntry, ac: parseInt(e.target.value) || 10 })} style={{ fontFamily: "var(--font-mono)" }} /></div>
             <div style={{ flex: 1 }}>
               <label style={{ fontSize: "0.6875rem", color: "var(--color-text-muted)" }}>Type</label>
-              <button className={manualEntry.type === "monster" ? "btn btn--danger" : "btn btn--secondary"} style={{ width: "100%", fontSize: "0.6875rem" }} onClick={() => setManualEntry({ ...manualEntry, type: manualEntry.type === "monster" ? "npc" : "monster" })}>
-                {manualEntry.type === "monster" ? "Monstre" : "PNJ"}
+              <button className={manualEntry.type === "monster" ? "btn btn--danger" : "btn btn--secondary"} style={{ width: "100%", fontSize: "0.6875rem", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.25rem" }} onClick={() => setManualEntry({ ...manualEntry, type: manualEntry.type === "monster" ? "npc" : "monster" })}>
+                {manualEntry.type === "monster" ? <><GiWolfHead /> Monstre</> : <><GiCharacter /> PNJ</>}
               </button>
             </div>
           </div>
@@ -316,6 +340,8 @@ export default function CombatTracker({ campaignId }: Props) {
         const initVal = initInputs[p.id] || "";
         const typeColor = p.participant_type === "player" ? "var(--color-player-color)" : p.participant_type === "npc" ? "var(--color-npc-color)" : "var(--color-error)";
 
+        const ParticipantIcon = p.participant_type === "player" ? GiCrestedHelmet : p.participant_type === "npc" ? GiCharacter : GiWolfHead;
+
         return (
           <div key={p.id} className={"card" + (isCurrent ? " animate-pulse-turn" : "")} style={{ borderLeft: "3px solid " + typeColor, backgroundColor: isCurrent ? "rgba(201,168,76,0.08)" : undefined }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
@@ -323,36 +349,42 @@ export default function CombatTracker({ campaignId }: Props) {
                 {/* Initiative */}
                 <div style={{ textAlign: "center", minWidth: "2rem" }}>
                   {initVal !== "" || p.initiative === 0 ? (
-                    <input className="input" type="number" value={initVal || (p.initiative || "")} onChange={e => setInitInputs(ii => ({ ...ii, [p.id]: e.target.value }))} onBlur={() => { if (initVal) updateInitiative(p.id, parseInt(initVal) || 0); }} onKeyDown={e => { if (e.key === "Enter" && initVal) updateInitiative(p.id, parseInt(initVal) || 0); }} style={{ width: "2.5rem", textAlign: "center", fontFamily: "var(--font-mono)", fontSize: "1rem", fontWeight: 700, padding: "0.125rem", backgroundColor: "transparent", border: "1px dashed var(--color-border)" }} />
+                    <input className="input" type="number" min={0} value={initVal || (p.initiative || "")} onChange={e => setInitInputs(ii => ({ ...ii, [p.id]: e.target.value }))} onBlur={() => { if (initVal) updateInitiative(p.id, parseInt(initVal) || 0); }} onKeyDown={e => { if (e.key === "Enter" && initVal) updateInitiative(p.id, parseInt(initVal) || 0); }} style={{ width: "2.5rem", textAlign: "center", fontFamily: "var(--font-mono)", fontSize: "1rem", fontWeight: 700, padding: "0.125rem", backgroundColor: "transparent", border: "1px dashed var(--color-border)" }} />
                   ) : (
-                    <span onClick={() => setInitInputs(ii => ({ ...ii, [p.id]: String(p.initiative) }))} style={{ fontFamily: "var(--font-mono)", fontSize: "1.25rem", fontWeight: 700, color: "var(--color-accent)", cursor: "pointer" }}>{p.initiative}</span>
+                    <span onClick={() => setInitInputs(ii => ({ ...ii, [p.id]: String(p.initiative) }))} style={{ fontFamily: "var(--font-mono)", fontSize: "1.25rem", fontWeight: 700, color: "var(--color-accent)", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: "0.125rem" }}>
+                      <span style={{ fontSize: "1.25rem" }}>{p.initiative}</span>
+                    </span>
                   )}
                 </div>
                 <div>
-                  <span style={{ fontWeight: 600 }}>{p.display_name}</span>
-                  <span className={p.participant_type === "player" ? "badge badge--player" : p.participant_type === "npc" ? "badge badge--npc" : "badge badge--negative"} style={{ marginLeft: "0.375rem", fontSize: "0.5rem" }}>
+                  <span style={{ fontWeight: 600, display: "flex", alignItems: "center", gap: "0.375rem" }}>
+                    {isCurrent && <GiBroadsword style={{ color: "var(--color-accent)" }} />}
+                    {p.display_name}
+                  </span>
+                  <span className={p.participant_type === "player" ? "badge badge--player" : p.participant_type === "npc" ? "badge badge--npc" : "badge badge--negative"} style={{ display: "inline-flex", alignItems: "center", gap: "0.25rem", marginLeft: "0.375rem", fontSize: "0.5rem" }}>
+                    <ParticipantIcon size={10} />
                     {p.participant_type === "player" ? "PJ" : p.participant_type === "npc" ? "PNJ" : "Monstre"}
                   </span>
                 </div>
               </div>
               <div style={{ textAlign: "center" }}>
-                <div style={{ fontSize: "0.5625rem", color: "var(--color-text-muted)" }}>CA</div>
+                <div style={{ fontSize: "0.5625rem", color: "var(--color-text-muted)", display: "flex", justifyContent: "center", alignItems: "center", gap: "0.25rem" }}><GiShield size={12} /> CA</div>
                 <div style={{ fontFamily: "var(--font-mono)", fontWeight: 600 }}>{p.armor_class}</div>
               </div>
             </div>
 
             <div style={{ marginTop: "0.375rem" }}>
               <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.6875rem", marginBottom: "0.125rem" }}>
-                <span style={{ color: "var(--color-text-muted)" }}>PV</span>
+                <span style={{ color: "var(--color-text-muted)", display: "flex", alignItems: "center", gap: "0.25rem" }}><GiHearts /> PV</span>
                 <span style={{ fontFamily: "var(--font-mono)", color: hpColor }}>{p.hp_current}/{p.hp_max}</span>
               </div>
               <div className="hp-bar">
                 <div className="hp-bar__fill" style={{ width: hpPercent + "%", backgroundColor: hpColor }} />
               </div>
               <div style={{ display: "flex", gap: "0.375rem", marginTop: "0.375rem", alignItems: "center" }}>
-                <button className="btn btn--danger" style={{ padding: "0.25rem 0.375rem", fontSize: "0.6875rem" }} onClick={() => applyHp(p.id, -(parseInt(hpVal) || 1))}>-</button>
-                <input className="input" type="number" value={hpVal} onChange={e => setHpInputs(h => ({ ...h, [p.id]: e.target.value }))} placeholder="Val" style={{ width: "3rem", textAlign: "center", fontFamily: "var(--font-mono)", fontSize: "0.75rem", padding: "0.25rem" }} />
-                <button className="btn" style={{ padding: "0.25rem 0.375rem", fontSize: "0.6875rem", backgroundColor: "var(--color-healing)", color: "#fff" }} onClick={() => applyHp(p.id, parseInt(hpVal) || 1)}>+</button>
+                <button className="btn btn--danger" style={{ padding: "0.25rem 0.375rem", fontSize: "0.6875rem", minWidth: "2rem" }} onClick={() => applyHp(p.id, -(parseInt(hpVal) || 1))}>-</button>
+                <input className="input" type="number" min={0} value={hpVal} onChange={e => setHpInputs(h => ({ ...h, [p.id]: e.target.value }))} placeholder="Val" style={{ width: "3.5rem", textAlign: "center", fontFamily: "var(--font-mono)", fontSize: "0.75rem", padding: "0.25rem" }} />
+                <button className="btn" style={{ padding: "0.25rem 0.375rem", fontSize: "0.6875rem", minWidth: "2rem", backgroundColor: "var(--color-healing)", color: "#fff" }} onClick={() => applyHp(p.id, parseInt(hpVal) || 1)}>+</button>
                 <div style={{ flex: 1 }} />
                 <button className="btn btn--ghost" onClick={() => toggleActive(p.id)} style={{ fontSize: "0.5625rem", padding: "0.125rem 0.25rem" }}>KO</button>
                 <button className="btn btn--ghost" onClick={() => removeParticipant(p.id)} style={{ fontSize: "0.5625rem", padding: "0.125rem 0.25rem", color: "var(--color-error)" }}>x</button>
@@ -365,11 +397,17 @@ export default function CombatTracker({ campaignId }: Props) {
       {/* Downed */}
       {downedParticipants.length > 0 && (
         <>
-          <p style={{ fontSize: "0.6875rem", color: "var(--color-text-muted)", textTransform: "uppercase", marginTop: "0.5rem" }}>Hors combat ({downedParticipants.length})</p>
+          <p style={{ fontSize: "0.6875rem", color: "var(--color-text-muted)", textTransform: "uppercase", marginTop: "0.5rem", display: "flex", alignItems: "center", gap: "0.375rem" }}>
+            <GiDeathSkull /> Hors combat ({downedParticipants.length})
+          </p>
           {downedParticipants.map(p => (
-            <div key={p.id} className="card" style={{ opacity: 0.5 }}>
+            <div key={p.id} className="card" style={{ opacity: 0.5, padding: "0.5rem 0.75rem" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span>{p.display_name} <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.75rem", color: "var(--color-error)" }}>{p.hp_current}/{p.hp_max}</span></span>
+                <span style={{ display: "flex", alignItems: "center", gap: "0.375rem", fontSize: "0.875rem" }}>
+                  <GiDeathSkull style={{ color: "var(--color-error)" }} /> 
+                  {p.display_name} 
+                  <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.75rem", color: "var(--color-error)" }}>({p.hp_current}/{p.hp_max})</span>
+                </span>
                 <div style={{ display: "flex", gap: "0.25rem" }}>
                   <button className="btn btn--ghost" onClick={() => toggleActive(p.id)} style={{ fontSize: "0.6875rem", color: "var(--color-success)" }}>Relever</button>
                   <button className="btn btn--ghost" onClick={() => removeParticipant(p.id)} style={{ fontSize: "0.6875rem", color: "var(--color-error)" }}>x</button>

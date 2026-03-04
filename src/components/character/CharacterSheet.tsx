@@ -216,7 +216,7 @@ export default function CharacterSheet({ campaignId, isGM, targetUserId }: Props
           <div className="stat-block" style={{ backgroundColor: "var(--color-background-alt)", borderRadius: "var(--card-radius)", padding: "0.375rem 0.75rem" }}>
             <span className="stat-block__label" style={{ display: "flex", alignItems: "center", gap: "0.25rem", justifyContent: "center" }}><GiStarMedal /> Niveau</span>
             {editing === "level" ? (
-              <input className="input" type="number" value={editValue} onChange={e => setEditValue(e.target.value)} autoFocus onBlur={() => confirmEdit("level", true)} onKeyDown={e => e.key === "Enter" && confirmEdit("level", true)} style={{ width: "3rem", textAlign: "center", fontFamily: "var(--font-mono)", fontSize: "1.25rem", padding: "0.125rem" }} />
+              <input className="input" type="number" min={0} value={editValue} onChange={e => setEditValue(e.target.value)} autoFocus onBlur={() => confirmEdit("level", true)} onKeyDown={e => e.key === "Enter" && confirmEdit("level", true)} style={{ width: "3rem", textAlign: "center", fontFamily: "var(--font-mono)", fontSize: "1.25rem", padding: "0.125rem" }} />
             ) : (
               <span className="stat-block__value" onClick={() => startEdit("level", char.level)} style={{ cursor: canEdit ? "pointer" : "default", color: "var(--color-accent)" }}>{char.level}</span>
             )}
@@ -228,7 +228,7 @@ export default function CharacterSheet({ campaignId, isGM, targetUserId }: Props
           <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.75rem", marginBottom: "0.25rem" }}>
             <span style={{ color: "var(--color-text-muted)", display: "flex", alignItems: "center", gap: "0.25rem" }}><GiSparkles /> XP</span>
             {editing === "xp" ? (
-              <input className="input" type="number" value={editValue} onChange={e => setEditValue(e.target.value)} autoFocus onBlur={() => confirmEdit("xp", true)} onKeyDown={e => e.key === "Enter" && confirmEdit("xp", true)} style={{ width: "5rem", textAlign: "right", fontSize: "0.75rem", padding: "0.125rem 0.375rem" }} />
+              <input className="input" type="number" min={0} value={editValue} onChange={e => setEditValue(e.target.value)} autoFocus onBlur={() => confirmEdit("xp", true)} onKeyDown={e => e.key === "Enter" && confirmEdit("xp", true)} style={{ width: "5rem", textAlign: "right", fontSize: "0.75rem", padding: "0.125rem 0.375rem" }} />
             ) : (
               <span onClick={() => startEdit("xp", char.xp)} style={{ cursor: canEdit ? "pointer" : "default", fontFamily: "var(--font-mono)", color: "var(--color-xp)" }}>{char.xp}</span>
             )}
@@ -244,7 +244,7 @@ export default function CharacterSheet({ campaignId, isGM, targetUserId }: Props
           </span>
           <span style={{ fontFamily: "var(--font-mono)", fontSize: "1.125rem", color: hpColor }}>
             {char.hp_current} / {editing === "hp_max" ? (
-              <input className="input" type="number" value={editValue} onChange={e => setEditValue(e.target.value)} autoFocus onBlur={() => confirmEdit("hp_max", true)} onKeyDown={e => e.key === "Enter" && confirmEdit("hp_max", true)} style={{ width: "3.5rem", display: "inline", textAlign: "center", fontSize: "1.125rem", padding: "0" }} />
+              <input className="input" type="number" min={0} value={editValue} onChange={e => setEditValue(e.target.value)} autoFocus onBlur={() => confirmEdit("hp_max", true)} onKeyDown={e => e.key === "Enter" && confirmEdit("hp_max", true)} style={{ width: "3.5rem", display: "inline", textAlign: "center", fontSize: "1.125rem", padding: "0" }} />
             ) : (
               <span onClick={() => startEdit("hp_max", char.hp_max)} style={{ cursor: canEdit ? "pointer" : "default" }}>{char.hp_max}</span>
             )}
@@ -258,7 +258,7 @@ export default function CharacterSheet({ campaignId, isGM, targetUserId }: Props
             <button className="btn btn--danger" style={{ padding: "0.375rem 0.625rem", fontSize: "0.8125rem", display: "flex", alignItems: "center", gap: "0.25rem" }} onClick={() => { const d = parseInt(hpDelta) || 1; applyHpChange(-d); }}>
               <GiBroadsword /> Dégâts
             </button>
-            <input className="input" type="number" placeholder="Valeur" value={hpDelta} onChange={e => setHpDelta(e.target.value)} style={{ width: "4.5rem", textAlign: "center", fontFamily: "var(--font-mono)" }} onKeyDown={e => { if (e.key === "Enter") { const d = parseInt(hpDelta) || 1; applyHpChange(-d); } }} />
+            <input className="input" type="number" min={0} placeholder="Valeur" value={hpDelta} onChange={e => setHpDelta(e.target.value)} style={{ width: "4.5rem", textAlign: "center", fontFamily: "var(--font-mono)" }} onKeyDown={e => { if (e.key === "Enter") { const d = parseInt(hpDelta) || 1; applyHpChange(-d); } }} />
             <button className="btn" style={{ padding: "0.375rem 0.625rem", fontSize: "0.8125rem", backgroundColor: "var(--color-healing)", color: "#fff", display: "flex", alignItems: "center", gap: "0.25rem" }} onClick={() => { const d = parseInt(hpDelta) || 1; applyHpChange(d); }}>
               <GiHealthPotion /> Soin
             </button>
@@ -268,7 +268,7 @@ export default function CharacterSheet({ campaignId, isGM, targetUserId }: Props
           <div className="stat-block" style={{ backgroundColor: "var(--color-background-alt)", borderRadius: "var(--card-radius)" }}>
             <span className="stat-block__label" style={{ display: "flex", alignItems: "center", gap: "0.25rem", justifyContent: "center" }}><GiShield size={14} style={{ color: "var(--color-armor-class)" }} /> CA</span>
             {editing === "armor_class" ? (
-              <input className="input" type="number" value={editValue} onChange={e => setEditValue(e.target.value)} autoFocus onBlur={() => confirmEdit("armor_class", true)} onKeyDown={e => e.key === "Enter" && confirmEdit("armor_class", true)} style={{ width: "3rem", textAlign: "center", fontFamily: "var(--font-mono)", fontSize: "1.25rem", padding: "0.125rem" }} />
+              <input className="input" type="number" min={0} value={editValue} onChange={e => setEditValue(e.target.value)} autoFocus onBlur={() => confirmEdit("armor_class", true)} onKeyDown={e => e.key === "Enter" && confirmEdit("armor_class", true)} style={{ width: "3rem", textAlign: "center", fontFamily: "var(--font-mono)", fontSize: "1.25rem", padding: "0.125rem" }} />
             ) : (
               <span className="stat-block__value" onClick={() => startEdit("armor_class", char.armor_class)} style={{ cursor: canEdit ? "pointer" : "default", color: "var(--color-armor-class)" }}>{char.armor_class}</span>
             )}
@@ -276,7 +276,7 @@ export default function CharacterSheet({ campaignId, isGM, targetUserId }: Props
           <div className="stat-block" style={{ backgroundColor: "var(--color-background-alt)", borderRadius: "var(--card-radius)" }}>
             <span className="stat-block__label" style={{ display: "flex", alignItems: "center", gap: "0.25rem", justifyContent: "center" }}><GiLeatherBoot size={14} /> Vitesse</span>
             {editing === "speed" ? (
-              <input className="input" type="number" value={editValue} onChange={e => setEditValue(e.target.value)} autoFocus onBlur={() => confirmEdit("speed", true)} onKeyDown={e => e.key === "Enter" && confirmEdit("speed", true)} style={{ width: "3rem", textAlign: "center", fontFamily: "var(--font-mono)", fontSize: "1.25rem", padding: "0.125rem" }} />
+              <input className="input" type="number" min={0} value={editValue} onChange={e => setEditValue(e.target.value)} autoFocus onBlur={() => confirmEdit("speed", true)} onKeyDown={e => e.key === "Enter" && confirmEdit("speed", true)} style={{ width: "3rem", textAlign: "center", fontFamily: "var(--font-mono)", fontSize: "1.25rem", padding: "0.125rem" }} />
             ) : (
               <span className="stat-block__value" onClick={() => startEdit("speed", char.speed)} style={{ cursor: canEdit ? "pointer" : "default" }}>{char.speed}</span>
             )}
@@ -294,7 +294,7 @@ export default function CharacterSheet({ campaignId, isGM, targetUserId }: Props
             <div key={key} className="stat-block" style={{ backgroundColor: "var(--color-background-alt)", borderRadius: "var(--card-radius)", border: "1px solid var(--color-border)" }}>
               <span className="stat-block__label">{label}</span>
               {editing === key ? (
-                <input className="input" type="number" value={editValue} onChange={e => setEditValue(e.target.value)} autoFocus onBlur={() => confirmEdit(key, true)} onKeyDown={e => e.key === "Enter" && confirmEdit(key, true)} style={{ width: "3rem", textAlign: "center", fontFamily: "var(--font-mono)", fontSize: "1.25rem", padding: "0.125rem" }} />
+                <input className="input" type="number" min={0} value={editValue} onChange={e => setEditValue(e.target.value)} autoFocus onBlur={() => confirmEdit(key, true)} onKeyDown={e => e.key === "Enter" && confirmEdit(key, true)} style={{ width: "3rem", textAlign: "center", fontFamily: "var(--font-mono)", fontSize: "1.25rem", padding: "0.125rem" }} />
               ) : (
                 <span className="stat-block__value" onClick={() => startEdit(key, (char as any)[key])} style={{ cursor: canEdit ? "pointer" : "default" }}>{(char as any)[key]}</span>
               )}
