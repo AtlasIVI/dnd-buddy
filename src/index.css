@@ -29,6 +29,10 @@ h1 { font-size: 1.75rem; } h2 { font-size: 1.5rem; } h3 { font-size: 1.25rem; }
 ::-webkit-scrollbar-track { background: var(--color-background-alt); }
 ::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 3px; }
 
+/* ============================================================
+   CARDS
+   ============================================================ */
+
 .card {
   background-color: var(--color-surface);
   background-image: var(--surface-image, none);
@@ -41,35 +45,74 @@ h1 { font-size: 1.75rem; } h2 { font-size: 1.5rem; } h3 { font-size: 1.25rem; }
 .card:hover { box-shadow: var(--card-shadow-hover); }
 .card--accent { border-color: var(--color-border-accent); }
 
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
   padding: 0.5rem 1rem; border-radius: var(--button-radius);
   font-family: var(--font-body); font-size: 0.875rem; font-weight: 600;
   cursor: pointer; transition: var(--transition); border: 1px solid transparent;
+  /* Mobile : zone de touche minimum 44px */
+  min-height: 2.75rem;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 .btn--primary { background-color: var(--color-accent); color: var(--color-accent-text); }
 .btn--primary:hover { background-color: var(--color-accent-hover); box-shadow: var(--glow-accent); }
+.btn--primary:active { transform: scale(0.97); }
 .btn--secondary { background: transparent; color: var(--color-text-primary); border-color: var(--color-border); }
 .btn--secondary:hover { border-color: var(--color-border-accent); background-color: var(--color-surface-hover); }
 .btn--danger { background-color: var(--color-error); color: #fff; }
-.btn--ghost { background: transparent; color: var(--color-text-secondary); border: none; }
+.btn--danger:active { transform: scale(0.97); }
+.btn--ghost { background: transparent; color: var(--color-text-secondary); border: none; min-height: 2rem; }
 .btn--ghost:hover { color: var(--color-text-primary); background-color: var(--color-surface-hover); }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ============================================================
+   INPUTS
+   ============================================================ */
 
 .input {
   width: 100%; padding: 0.5rem 0.75rem;
   background-color: var(--color-background-alt); border: 1px solid var(--color-border);
   border-radius: var(--input-radius); color: var(--color-text-primary);
   font-family: var(--font-body); font-size: 0.875rem; transition: var(--transition);
+  /* Mobile : évite le zoom auto sur iOS */
+  font-size: max(1rem, 0.875rem);
 }
 .input:focus { outline: none; border-color: var(--color-border-accent); box-shadow: var(--glow-accent); }
 .input::placeholder { color: var(--color-text-muted); }
+.input[readonly] { opacity: 0.7; cursor: default; }
 
-.hp-bar { position: relative; width: 100%; height: 0.5rem; background-color: var(--color-hp-background); border-radius: 999px; overflow: hidden; }
-.hp-bar__fill { height: 100%; background-color: var(--color-hp); border-radius: 999px; transition: width 0.5s ease; }
+/* Masquer les flèches sur number inputs */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
+
+/* ============================================================
+   HP BAR
+   ============================================================ */
+
+.hp-bar {
+  position: relative; width: 100%; height: 0.5rem;
+  background-color: var(--color-hp-background); border-radius: 999px; overflow: hidden;
+}
+.hp-bar__fill {
+  height: 100%; background-color: var(--color-hp); border-radius: 999px;
+  transition: width 0.5s ease;
+}
 .hp-bar--large { height: 1rem; }
 
-.badge { display: inline-flex; align-items: center; padding: 0.125rem 0.5rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; font-family: var(--font-mono); }
+/* ============================================================
+   BADGES
+   ============================================================ */
+
+.badge {
+  display: inline-flex; align-items: center; padding: 0.125rem 0.5rem;
+  border-radius: 999px; font-size: 0.75rem; font-weight: 600; font-family: var(--font-mono);
+}
 .badge--player { background-color: var(--color-player-color); color: #fff; }
 .badge--monster { background-color: var(--color-monster-color); color: #fff; }
 .badge--npc { background-color: var(--color-npc-color); color: #fff; }
@@ -77,112 +120,185 @@ h1 { font-size: 1.75rem; } h2 { font-size: 1.5rem; } h3 { font-size: 1.25rem; }
 .badge--positive { background-color: var(--color-success); color: #fff; }
 .badge--negative { background-color: var(--color-error); color: #fff; }
 
-.stat-block { display: flex; flex-direction: column; align-items: center; padding: 0.5rem; min-width: 3.5rem; }
+/* ============================================================
+   STAT BLOCK
+   ============================================================ */
+
+.stat-block {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 0.5rem; min-width: 3.5rem;
+}
 .stat-block__value { font-family: var(--font-mono); font-size: 1.25rem; font-weight: 600; color: var(--color-text-primary); }
 .stat-block__label { font-size: 0.625rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-muted); }
 
-@keyframes flash-damage { 0%, 100% { background-color: transparent; } 50% { background-color: rgba(231,76,60,0.2); } }
-@keyframes flash-heal { 0%, 100% { background-color: transparent; } 50% { background-color: rgba(39,174,96,0.15); } }
-@keyframes pulse-turn { 0%, 100% { box-shadow: 0 0 0 0 var(--color-your-turn); } 50% { box-shadow: 0 0 12px 4px var(--color-your-turn); } }
-@keyframes fade-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes pop-in { 0% { transform: scale(0.8); opacity: 0; } 70% { transform: scale(1.05); } 100% { transform: scale(1); opacity: 1; } }
-
-.animate-damage { animation: flash-damage 0.4s ease; }
-.animate-heal { animation: flash-heal 0.4s ease; }
-.animate-turn { animation: pulse-turn 2s infinite; }
-.animate-fade-in { animation: fade-in 0.3s ease forwards; }
-.animate-pop-in { animation: pop-in 0.3s ease forwards; }
-
 /* ============================================================
-   Masquer les flèches des inputs de type number
+   MODALES — FIX MANQUANT
    ============================================================ */
 
-/* Pour Chrome, Safari, Edge, Opera */
-input[type="number"]::-webkit-outer-spin-button,
-input[type="number"]::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
+.confirm-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
 }
 
-/* Pour Firefox */
-input[type="number"] {
-  -moz-appearance: textfield;
-  appearance: textfield;
+.confirm-dialog {
+  background-color: var(--color-surface);
+  border: 2px solid var(--color-border-accent);
+  border-radius: var(--card-radius);
+  padding: 1.5rem;
+  width: 100%;
+  max-width: 22rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
 }
+
+/* ============================================================
+   CARD GRID
+   ============================================================ */
+
+.card-grid { display: grid; gap: 0.75rem; }
+.card-grid--2col { grid-template-columns: repeat(2, 1fr); }
+
+@media (max-width: 480px) {
+  .card-grid--2col { grid-template-columns: 1fr; }
+}
+
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
+
+@keyframes flash-damage {
+  0%, 100% { background-color: var(--color-surface); }
+  30%, 70% { background-color: rgba(231, 76, 60, 0.25); border-color: var(--color-error); }
+}
+@keyframes flash-heal {
+  0%, 100% { background-color: var(--color-surface); }
+  30%, 70% { background-color: rgba(39, 174, 96, 0.2); border-color: var(--color-success); }
+}
+@keyframes pulse-turn {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 200, 0, 0); }
+  50% { box-shadow: 0 0 16px 4px rgba(255, 200, 0, 0.25); }
+}
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes pop-in {
+  0% { transform: scale(0.85); opacity: 0; }
+  70% { transform: scale(1.03); }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-damage { animation: flash-damage 0.5s ease; }
+.animate-heal { animation: flash-heal 0.5s ease; }
+.animate-pulse-turn { animation: pulse-turn 2s ease-in-out infinite; }
+.animate-fade-in { animation: fade-in 0.3s ease forwards; }
+.animate-pop-in { animation: pop-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+.animate-slide-up { animation: slide-up 0.4s ease forwards; }
 
 /* ============================================================
    LAYOUT (App Shell & Navigation)
    ============================================================ */
 
-.app-shell { 
-  display: flex; 
-  flex-direction: column; 
-  min-height: 100dvh; 
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
 }
 
-.app-content { 
-  flex: 1; 
-  padding: 1rem; 
-  max-width: 48rem; 
-  margin: 0 auto; 
-  width: 100%; 
+.app-content {
+  flex: 1;
+  padding: 1rem;
+  max-width: 48rem;
+  margin: 0 auto;
+  width: 100%;
 }
 
-/* Base = Mobile (Barre fixée en bas) */
+/* Mobile avec nav : espace pour la barre du bas */
 .app-shell--with-nav .app-content {
-  padding-bottom: 5rem; /* Espace pour la barre sur mobile uniquement si elle existe */
+  padding-bottom: 5rem;
 }
+
+/* ============================================================
+   BOTTOM NAV (mobile) / SIDE NAV (desktop)
+   ============================================================ */
 
 .bottom-nav {
-  position: fixed; 
-  bottom: 0; 
-  left: 0; 
+  position: fixed;
+  bottom: 0;
+  left: 0;
   right: 0;
-  display: flex; 
-  justify-content: space-around; 
+  display: flex;
+  justify-content: space-around;
   align-items: center;
-  height: 4rem; 
+  height: 4rem;
   background-color: var(--color-surface);
-  border-top: 1px solid var(--color-border); 
+  border-top: 1px solid var(--color-border);
   z-index: 100;
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  /* iOS safe area */
+  padding-bottom: env(safe-area-inset-bottom, 0);
 }
 
 .bottom-nav__item {
-  display: flex; 
-  flex-direction: column; 
-  align-items: center; 
-  gap: 0.25rem;
-  padding: 0.375rem 0.75rem; 
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.375rem 0.5rem;
   color: var(--color-text-muted);
-  font-size: 0.85rem; /* Police agrandie sur mobile */
-  font-weight: 700;   /* Police en gras */
+  font-size: 0.7rem;
+  font-weight: 700;
   font-family: var(--font-body);
-  transition: var(--transition); 
-  cursor: pointer; 
-  background: none; 
+  transition: var(--transition);
+  cursor: pointer;
+  background: none;
   border: none;
+  /* Zone de touche minimum */
+  min-height: 3.5rem;
+  min-width: 3.5rem;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  border-radius: var(--button-radius);
 }
 
 .bottom-nav__item:hover { color: var(--color-text-primary); }
-.bottom-nav__item--active { color: var(--color-accent); }
+.bottom-nav__item--active {
+  color: var(--color-accent);
+  background-color: color-mix(in srgb, var(--color-accent) 10%, transparent);
+  border-radius: var(--button-radius);
+}
 
 /* ============================================================
-   MEDIA QUERIES (Adaptation selon l'écran)
+   RESPONSIVE
    ============================================================ */
 
 @media (max-width: 640px) {
   h1 { font-size: 1.5rem; }
   .app-content { padding: 0.75rem; }
   .app-shell--with-nav .app-content { padding-bottom: 5rem; }
+
+  /* Inputs plus grands sur mobile pour faciliter le toucher */
+  .input { padding: 0.625rem 0.75rem; }
+  .card { padding: 0.75rem; }
 }
 
-/* PC et Tablettes (Largeur >= 768px) -> Barre latérale gauche */
+/* PC et tablettes (>= 768px) : nav latérale gauche */
 @media (min-width: 768px) {
-  /* On applique le décalage UNIQUEMENT au contenu, pour que l'en-tête reste sur toute la largeur */
   .app-shell--with-nav .app-content {
-    padding-left: 7rem; /* 6rem de barre + 1rem d'espacement */
-    padding-bottom: 2rem; 
+    padding-left: 7rem;
+    padding-bottom: 2rem;
     padding-top: 2rem;
   }
 
@@ -192,17 +308,30 @@ input[type="number"] {
     left: 0;
     right: auto;
     width: 6rem;
-    height: 100dvh; 
+    height: 100dvh;
     flex-direction: column;
-    justify-content: flex-start; 
-    padding-top: 5rem; /* <-- AJUSTÉ : On laisse 5rem d'espace en haut pour l'en-tête ! */
+    justify-content: flex-start;
+    padding-top: 5rem;
     border-top: none;
     border-right: 1px solid var(--color-border);
-    gap: 1.5rem;
+    gap: 0.5rem;
+    padding-bottom: 0;
   }
 
   .bottom-nav__item {
-    font-size: 1rem; 
-    font-weight: 700; 
+    font-size: 0.75rem;
+    font-weight: 700;
+    width: 100%;
+    min-height: 4rem;
   }
+
+  .card-grid--2col { grid-template-columns: repeat(2, 1fr); }
+
+  .confirm-dialog {
+    max-width: 28rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .card-grid--2col { grid-template-columns: repeat(2, 1fr); }
 }
