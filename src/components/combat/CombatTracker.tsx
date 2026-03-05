@@ -1,7 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../../lib/supabase';
 import type { Tables } from '../../types/database';
-import { GiBroadsword, GiSundial, GiShield, GiHearts, GiCrestedHelmet, GiWolfHead, GiCharacter, GiDeathSkull, GiCrossedSwords } from 'react-icons/gi';
+import { 
+  GiBroadsword, GiSundial, GiShield, GiHearts, 
+  GiCrestedHelmet, GiWolfHead, GiCharacter, 
+  GiDeathSkull, GiCrossedSwords, GiAura 
+} from 'react-icons/gi';
 
 interface CombatTrackerProps {
   campaignId: string;
@@ -133,10 +137,6 @@ export default function CombatTracker({ campaignId }: CombatTrackerProps) {
     await supabase.from('combat_participants').update({ is_active: !isActive }).eq('id', id);
   }
 
-  /**
-   * FIX PRINCIPAL : on travaille uniquement sur les participants ACTIFS triés par initiative.
-   * L'index est relatif à cette liste filtrée, ce qui évite le décalage quand des participants sont KO.
-   */
   async function nextTurn() {
     if (!combat) return;
     const activeParts = participants.filter(p => p.is_active).sort((a, b) => b.initiative - a.initiative);
@@ -230,9 +230,36 @@ export default function CombatTracker({ campaignId }: CombatTrackerProps) {
           <p style={{ fontSize: '0.625rem', color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.25rem' }}>
             <GiSundial size={12} style={{ marginRight: '0.25rem' }} />Tour {safeIdx + 1}/{activeParts.length}
           </p>
-          <h3 style={{ fontSize: '1.25rem', color: 'var(--color-your-turn)' }}>{currentParticipant.display_name}</h3>
-          <button className="btn btn--primary" onClick={nextTurn} style={{ marginTop: '0.5rem', width: '100%' }}>
-            Tour suivant →
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+            {typeIcon(currentParticipant.participant_type)}
+            <h3 style={{ fontSize: '1.25rem', color: 'var(--color-your-turn)', margin: 0 }}>{currentParticipant.display_name}</h3>
+          </div>
+          
+          {/* Actions rapides du MJ sur le joueur actif */}
+          <div style={{ backgroundColor: 'var(--color-background-alt)', borderRadius: '0.5rem', padding: '0.75rem', marginTop: '0.75rem', marginBottom: '0.75rem' }}>
+            <span style={{ fontSize: '0.6875rem', color: 'var(--color-text-muted)', textTransform: 'uppercase', display: 'block', marginBottom: '0.5rem' }}>Actions rapides du MJ</span>
+            
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '0.375rem', flexWrap: 'wrap', marginBottom: '0.5rem' }}>
+              <button className="btn btn--danger" onClick={() => updateParticipantHp(currentParticipant.id, -5)} style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}>-5 PV</button>
+              <button className="btn btn--danger" onClick={() => updateParticipantHp(currentParticipant.id, -1)} style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}>-1 PV</button>
+              <div style={{ padding: '0.25rem 0.5rem', fontSize: '0.875rem', fontWeight: 'bold', minWidth: '3rem', fontFamily: 'var(--font-mono)' }}>
+                {currentParticipant.hp_current}
+              </div>
+              <button className="btn btn--primary" onClick={() => updateParticipantHp(currentParticipant.id, 1)} style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem', backgroundColor: 'var(--color-success)' }}>+1 PV</button>
+              <button className="btn btn--primary" onClick={() => updateParticipantHp(currentParticipant.id, 5)} style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem', backgroundColor: 'var(--color-success)' }}>+5 PV</button>
+            </div>
+
+            <button 
+              className="btn btn--ghost" 
+              onClick={() => alert("La base de données doit être mise à jour pour stocker les effets liés aux tours. Le système de décompte sera branché ici !")} 
+              style={{ fontSize: '0.75rem', width: '100%' }}
+            >
+              <GiAura size={14} style={{ marginRight: '0.375rem' }} /> Appliquer un Effet Temporaire
+            </button>
+          </div>
+
+          <button className="btn btn--primary" onClick={nextTurn} style={{ width: '100%' }}>
+            Fin du tour →
           </button>
         </div>
       ) : null}

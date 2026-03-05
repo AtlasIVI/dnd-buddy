@@ -4,24 +4,16 @@ import { supabase } from '../lib/supabase';
 import type { Tables } from '../types/database';
 import ViewToggle, { type ViewMode } from '../components/ui/ViewToggle';
 
-// Composants MJ
-// MonsterLibrary → aucune prop
-// GmPanel        → aucune prop
 import GmPanel        from '../components/gm/GmPanel';
 import GmPlayersPanel from '../components/gm/GmPlayersPanel';
 import MonsterLibrary from '../components/gm/MonsterLibrary';
 import NpcPanel       from '../components/gm/NpcPanel';
 import CombatTracker  from '../components/combat/CombatTracker';
 
-// Composants Joueur
-// CharacterSheet → campaignId
-// SkillsList     → characterId + canEdit   (export default SkillsList)
-// InventoryPanel → characterId + canEdit   (export default Inventory)
-// SpellsPanel    → characterId + readOnly
-import CharacterSheet  from '../components/character/CharacterSheet';
-import SpellsPanel     from '../components/character/SpellsPanel';
-import InventoryPanel  from '../components/character/InventoryPanel';
-import SkillsList      from '../components/character/SkillsPanel';
+import CharacterSheet   from '../components/character/CharacterSheet';
+import SpellsPanel      from '../components/character/SpellsPanel';
+import InventoryPanel   from '../components/character/InventoryPanel';
+import SkillsList       from '../components/character/SkillsPanel';
 import PlayerCombatView from '../components/combat/PlayerCombatView';
 
 import {
@@ -35,12 +27,15 @@ import {
 type GmTab     = 'players' | 'combat' | 'npcs' | 'monsters' | 'config';
 type PlayerTab = 'sheet' | 'spells' | 'skills' | 'inventory' | 'combat';
 
-// Correspond exactement à App.tsx :
-// <CampaignPage campaignId={campaignId} role={role} onBack={...} />
 interface CampaignPageProps {
   campaignId: string;
   role: 'gm' | 'player';
   onBack: () => void;
+}
+
+// Stats du perso nécessaires pour SkillsList (calcul de modificateurs)
+type CharStats = {
+  str: number; dex: number; con: number; int: number; wis: number; cha: number; level: number;
 }
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
@@ -48,39 +43,42 @@ interface CampaignPageProps {
 export default function CampaignPage({ campaignId, role, onBack }: CampaignPageProps) {
   const { user } = useAuth();
 
-  // Toggle vue MJ ↔ Joueur (debug, visible seulement pour les MJs)
-  const [viewMode, setViewMode] = useState<ViewMode>(role === 'gm' ? 'gm' : 'player');
-
-  // Tabs
-  const [gmTab,     setGmTab]     = useState<GmTab>('players');
-  const [playerTab, setPlayerTab] = useState<PlayerTab>('sheet');
-
-  // Données
+  const [viewMode,    setViewMode]    = useState<ViewMode>(role === 'gm' ? 'gm' : 'player');
+  const [gmTab,       setGmTab]       = useState<GmTab>('players');
+  const [playerTab,   setPlayerTab]   = useState<PlayerTab>('sheet');
   const [campaign,    setCampaign]    = useState<Tables<'campaigns'> | null>(null);
   const [characterId, setCharacterId] = useState<string | null>(null);
+  const [charStats,   setCharStats]   = useState<CharStats | undefined>(undefined);
 
   const fetchCampaign = useCallback(async () => {
-    const { data } = await supabase
-      .from('campaigns').select('*').eq('id', campaignId).single();
+    const { data } = await supabase.from('campaigns').select('*').eq('id', campaignId).single();
     if (data) setCampaign(data);
   }, [campaignId]);
 
-  const fetchCharacterId = useCallback(async () => {
+  const fetchCharacter = useCallback(async () => {
     if (!user) return;
     const { data } = await supabase
-      .from('characters').select('id')
+      .from('characters')
+      .select('id, str, dex, con, int, wis, cha, level')
       .eq('campaign_id', campaignId)
       .eq('user_id', user.id)
       .single();
-    if (data) setCharacterId(data.id);
+    if (data) {
+      setCharacterId(data.id);
+      setCharStats({
+        str: data.str, dex: data.dex, con: data.con,
+        int: data.int, wis: data.wis, cha: data.cha,
+        level: data.level,
+      });
+    }
   }, [campaignId, user]);
 
   useEffect(() => {
     fetchCampaign();
-    fetchCharacterId();
-  }, [fetchCampaign, fetchCharacterId]);
+    fetchCharacter();
+  }, [fetchCampaign, fetchCharacter]);
 
-  // Realtime — mode combat/exploration
+  // Realtime — mode de campagne + stats du perso (pour que charStats soit toujours à jour)
   useEffect(() => {
     const ch = supabase.channel('campaign-page-' + campaignId)
       .on('postgres_changes', {
@@ -91,13 +89,33 @@ export default function CampaignPage({ campaignId, role, onBack }: CampaignPageP
     return () => { supabase.removeChannel(ch); };
   }, [campaignId]);
 
+  // Realtime — stats du personnage (si le joueur les modifie depuis la feuille)
+  useEffect(() => {
+    if (!characterId) return;
+    const ch = supabase.channel('campaign-page-char-' + characterId)
+      .on('postgres_changes', {
+        event: 'UPDATE', schema: 'public', table: 'characters',
+        filter: `id=eq.${characterId}`,
+      }, (p: any) => {
+        if (p.new) {
+          setCharStats({
+            str: p.new.str, dex: p.new.dex, con: p.new.con,
+            int: p.new.int, wis: p.new.wis, cha: p.new.cha,
+            level: p.new.level,
+          });
+        }
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [characterId]);
+
   const isGm     = role === 'gm';
   const inCombat = campaign?.mode === 'combat';
 
   return (
     <div className="app-shell app-shell--with-nav">
 
-      {/* ── Top bar ───────────────────────────────────────────── */}
+      {/* ── Top bar ── */}
       <header style={{
         position: 'fixed', top: 0, left: 0, right: 0, zIndex: 200,
         height: '3rem',
@@ -108,7 +126,6 @@ export default function CampaignPage({ campaignId, role, onBack }: CampaignPageP
         backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
-          {/* Chevron retour — GiArrowBack n'existe pas dans react-icons/gi */}
           <button
             className="btn btn--ghost"
             onClick={onBack}
@@ -131,7 +148,6 @@ export default function CampaignPage({ campaignId, role, onBack }: CampaignPageP
             {campaign?.name ?? '…'}
           </span>
 
-          {/* Badge mode */}
           <span style={{
             fontSize: '0.5625rem', fontWeight: 700, textTransform: 'uppercase',
             padding: '0.1rem 0.45rem', borderRadius: '999px',
@@ -144,13 +160,10 @@ export default function CampaignPage({ campaignId, role, onBack }: CampaignPageP
           </span>
         </div>
 
-        {/* Toggle vue — uniquement visible pour les MJs */}
-        {isGm && (
-          <ViewToggle current={viewMode} onChange={setViewMode} />
-        )}
+        {isGm && <ViewToggle current={viewMode} onChange={setViewMode} />}
       </header>
 
-      {/* ── Contenu ───────────────────────────────────────────── */}
+      {/* ── Contenu ── */}
       <div className="app-content" style={{ paddingTop: '4rem' }}>
         {viewMode === 'gm' ? (
           <GmView campaignId={campaignId} campaign={campaign} tab={gmTab} onBack={onBack} />
@@ -158,13 +171,14 @@ export default function CampaignPage({ campaignId, role, onBack }: CampaignPageP
           <PlayerView
             campaignId={campaignId}
             characterId={characterId}
+            charStats={charStats}
             tab={playerTab}
             isGmPreview={isGm && viewMode === 'player'}
           />
         )}
       </div>
 
-      {/* ── Nav basse ─────────────────────────────────────────── */}
+      {/* ── Nav basse ── */}
       <nav className="bottom-nav">
         {viewMode === 'gm' ? (
           <>
@@ -202,7 +216,6 @@ function GmView({ campaignId, campaign, tab, onBack }: {
       {tab === 'combat'   && <CombatTracker  campaignId={campaignId} />}
       {tab === 'npcs'     && <NpcPanel       campaignId={campaignId} />}
       {tab === 'monsters' && <MonsterLibrary />}
-      {/* GmPanel héberge CampaignConfig — a besoin de campaignId + onBack */}
       {tab === 'config'   && <GmPanel campaignId={campaignId} onBack={onBack} />}
     </>
   );
@@ -210,14 +223,13 @@ function GmView({ campaignId, campaign, tab, onBack }: {
 
 // ─── Vue Joueur ───────────────────────────────────────────────────────────────
 
-function PlayerView({ campaignId, characterId, tab, isGmPreview }: {
+function PlayerView({ campaignId, characterId, charStats, tab, isGmPreview }: {
   campaignId: string;
   characterId: string | null;
+  charStats: CharStats | undefined;
   tab: PlayerTab;
   isGmPreview?: boolean;
 }) {
-  // SkillsList et InventoryPanel prennent characterId + canEdit
-  // Un MJ en prévisualisation ne peut pas éditer
   const canEdit = !isGmPreview;
 
   return (
@@ -247,7 +259,7 @@ function PlayerView({ campaignId, characterId, tab, isGmPreview }: {
 
       {tab === 'skills' && (
         characterId
-          ? <SkillsList characterId={characterId} canEdit={canEdit} />
+          ? <SkillsList characterId={characterId} canEdit={canEdit} charStats={charStats} />
           : <NoCharCard message="Crée d'abord un personnage dans l'onglet Perso." />
       )}
 
