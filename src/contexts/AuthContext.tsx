@@ -33,13 +33,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchProfile = useCallback(async (userId: string) => {
+const fetchProfile = useCallback(async (userId: string) => {
     const { data } = await supabase
       .from('profiles')
       .select('*')
       .eq('id', userId)
       .single();
-    setProfile(data);
+      
+    // Ajoutez "as Profile" ici
+    setProfile(data as Profile); 
     setLoading(false);
   }, []);
 
@@ -102,7 +104,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .from('profiles')
       .update(updates)
       .eq('id', user.id)
-      .select()
+      .select('id, display_name, avatar_url, is_admin, created_at, updated_at')
       .single();
     if (data) setProfile(data);
   }
