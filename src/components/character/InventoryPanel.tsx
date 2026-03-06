@@ -71,7 +71,7 @@ export default function Inventory({ characterId, canEdit }: InventoryProps) {
           <GiBackpack size={20} style={{ color: 'var(--color-accent)' }} />
           <h2 style={{ fontSize: '1.25rem' }}>Inventaire ({items.length})</h2>
         </div>
-        {canEdit && <button className="btn btn--ghost" onClick={() => setShowForm(!showForm)} style={{ fontSize: '0.75rem' }}>{showForm ? 'Annuler' : '+ Objet'}</button>}
+        {canEdit && <button className="btn btn--ghost btn--add-toggle" onClick={() => setShowForm(!showForm)} style={{ fontSize: '0.75rem' }}>{showForm ? 'Annuler' : '+ Objet'}</button>}
       </div>
 
       {showForm && canEdit && (

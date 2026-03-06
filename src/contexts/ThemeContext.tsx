@@ -23,7 +23,10 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     applyThemeToElement(document.documentElement, theme, mode);
-  }, [theme, mode]);
+    // Expose active theme/mode to CSS for targeted visual overrides.
+    document.documentElement.setAttribute('data-theme', themeName);
+    document.documentElement.setAttribute('data-mode', mode);
+  }, [theme, themeName, mode]);
 
   return (
     <ThemeContext.Provider value={{ theme, themeName, mode, setTheme: setThemeName, setMode }}>
