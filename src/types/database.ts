@@ -42,6 +42,60 @@ export type Database = {
         Update: { campaign_id?: string; created_at?: string; current_turn_index?: number | null; ended_at?: string | null; id?: string; name?: string; status?: Database["public"]["Enums"]["combat_status"] }
         Relationships: [{ foreignKeyName: "combats_campaign_id_fkey"; columns: ["campaign_id"]; isOneToOne: false; referencedRelation: "campaigns"; referencedColumns: ["id"] }]
       }
+      active_buffs: {
+        Row: {
+          applied_at_round: number
+          applied_by_character_id: string | null
+          bonus_ca: number
+          bonus_hp_temp: number
+          bonus_stat_ability: Database["public"]["Enums"]["skill_ability"] | null
+          bonus_stat_value: number
+          character_id: string
+          combat_id: string
+          created_at: string
+          expires_at_round: number | null
+          id: string
+          is_active: boolean
+          source_id: string
+          source_name: string
+          source_type: string
+        }
+        Insert: {
+          applied_at_round?: number
+          applied_by_character_id?: string | null
+          bonus_ca?: number
+          bonus_hp_temp?: number
+          bonus_stat_ability?: Database["public"]["Enums"]["skill_ability"] | null
+          bonus_stat_value?: number
+          character_id: string
+          combat_id: string
+          created_at?: string
+          expires_at_round?: number | null
+          id?: string
+          is_active?: boolean
+          source_id: string
+          source_name: string
+          source_type?: string
+        }
+        Update: {
+          applied_at_round?: number
+          applied_by_character_id?: string | null
+          bonus_ca?: number
+          bonus_hp_temp?: number
+          bonus_stat_ability?: Database["public"]["Enums"]["skill_ability"] | null
+          bonus_stat_value?: number
+          character_id?: string
+          combat_id?: string
+          created_at?: string
+          expires_at_round?: number | null
+          id?: string
+          is_active?: boolean
+          source_id?: string
+          source_name?: string
+          source_type?: string
+        }
+        Relationships: [{ foreignKeyName: "active_buffs_character_id_fkey"; columns: ["character_id"]; isOneToOne: false; referencedRelation: "characters"; referencedColumns: ["id"] }, { foreignKeyName: "active_buffs_combat_id_fkey"; columns: ["combat_id"]; isOneToOne: false; referencedRelation: "combats"; referencedColumns: ["id"] }]
+      }
       effects: {
         Row: { character_id: string; created_at: string; description: string; id: string; is_positive: boolean; name: string; source: string }
         Insert: { character_id: string; created_at?: string; description?: string; id?: string; is_positive?: boolean; name: string; source?: string }
@@ -49,9 +103,72 @@ export type Database = {
         Relationships: [{ foreignKeyName: "effects_character_id_fkey"; columns: ["character_id"]; isOneToOne: false; referencedRelation: "characters"; referencedColumns: ["id"] }]
       }
       inventory_items: {
-        Row: { character_id: string; created_at: string; description: string; id: string; is_equipped: boolean; is_hidden: boolean; name: string; quantity: number; sort_order: number }
-        Insert: { character_id: string; created_at?: string; description?: string; id?: string; is_equipped?: boolean; is_hidden?: boolean; name: string; quantity?: number; sort_order?: number }
-        Update: { character_id?: string; created_at?: string; description?: string; id?: string; is_equipped?: boolean; is_hidden?: boolean; name?: string; quantity?: number; sort_order?: number }
+        Row: {
+          active_casting_time: string | null
+          active_damage_dice: string | null
+          active_description: string | null
+          active_name: string | null
+          active_rest_reset: Database["public"]["Enums"]["rest_type"] | null
+          active_uses_max: number | null
+          active_uses_remaining: number | null
+          bonus_ca: number
+          bonus_hp_max: number
+          bonus_stat_ability: Database["public"]["Enums"]["skill_ability"] | null
+          bonus_stat_value: number
+          character_id: string
+          created_at: string
+          description: string
+          id: string
+          is_equipped: boolean
+          is_hidden: boolean
+          name: string
+          quantity: number
+          sort_order: number
+        }
+        Insert: {
+          active_casting_time?: string | null
+          active_damage_dice?: string | null
+          active_description?: string | null
+          active_name?: string | null
+          active_rest_reset?: Database["public"]["Enums"]["rest_type"] | null
+          active_uses_max?: number | null
+          active_uses_remaining?: number | null
+          bonus_ca?: number
+          bonus_hp_max?: number
+          bonus_stat_ability?: Database["public"]["Enums"]["skill_ability"] | null
+          bonus_stat_value?: number
+          character_id: string
+          created_at?: string
+          description?: string
+          id?: string
+          is_equipped?: boolean
+          is_hidden?: boolean
+          name: string
+          quantity?: number
+          sort_order?: number
+        }
+        Update: {
+          active_casting_time?: string | null
+          active_damage_dice?: string | null
+          active_description?: string | null
+          active_name?: string | null
+          active_rest_reset?: Database["public"]["Enums"]["rest_type"] | null
+          active_uses_max?: number | null
+          active_uses_remaining?: number | null
+          bonus_ca?: number
+          bonus_hp_max?: number
+          bonus_stat_ability?: Database["public"]["Enums"]["skill_ability"] | null
+          bonus_stat_value?: number
+          character_id?: string
+          created_at?: string
+          description?: string
+          id?: string
+          is_equipped?: boolean
+          is_hidden?: boolean
+          name?: string
+          quantity?: number
+          sort_order?: number
+        }
         Relationships: [{ foreignKeyName: "inventory_items_character_id_fkey"; columns: ["character_id"]; isOneToOne: false; referencedRelation: "characters"; referencedColumns: ["id"] }]
       }
       monster_library: {
@@ -124,9 +241,72 @@ export type Database = {
         Relationships: [{ foreignKeyName: "spell_slots_character_id_fkey"; columns: ["character_id"]; isOneToOne: false; referencedRelation: "characters"; referencedColumns: ["id"] }]
       }
       spells: {
-        Row: { casting_time: string; character_id: string; concentration: boolean; created_at: string; damage_dice: string; description: string; duration: string; id: string; is_hidden: boolean; is_prepared: boolean; level: number; name: string; range: string; sort_order: number }
-        Insert: { casting_time?: string; character_id: string; concentration?: boolean; created_at?: string; damage_dice?: string; description?: string; duration?: string; id?: string; is_hidden?: boolean; is_prepared?: boolean; level?: number; name?: string; range?: string; sort_order?: number }
-        Update: { casting_time?: string; character_id?: string; concentration?: boolean; created_at?: string; damage_dice?: string; description?: string; duration?: string; id?: string; is_hidden?: boolean; is_prepared?: boolean; level?: number; name?: string; range?: string; sort_order?: number }
+        Row: {
+          buff_ca: number | null
+          buff_duration_rounds: number | null
+          buff_hp_temp: number | null
+          buff_stat_ability: Database["public"]["Enums"]["skill_ability"] | null
+          buff_stat_value: number | null
+          buff_target_count: number
+          casting_time: string
+          character_id: string
+          concentration: boolean
+          created_at: string
+          damage_dice: string
+          description: string
+          duration: string
+          id: string
+          is_hidden: boolean
+          is_prepared: boolean
+          level: number
+          name: string
+          range: string
+          sort_order: number
+        }
+        Insert: {
+          buff_ca?: number | null
+          buff_duration_rounds?: number | null
+          buff_hp_temp?: number | null
+          buff_stat_ability?: Database["public"]["Enums"]["skill_ability"] | null
+          buff_stat_value?: number | null
+          buff_target_count?: number
+          casting_time?: string
+          character_id: string
+          concentration?: boolean
+          created_at?: string
+          damage_dice?: string
+          description?: string
+          duration?: string
+          id?: string
+          is_hidden?: boolean
+          is_prepared?: boolean
+          level?: number
+          name?: string
+          range?: string
+          sort_order?: number
+        }
+        Update: {
+          buff_ca?: number | null
+          buff_duration_rounds?: number | null
+          buff_hp_temp?: number | null
+          buff_stat_ability?: Database["public"]["Enums"]["skill_ability"] | null
+          buff_stat_value?: number | null
+          buff_target_count?: number
+          casting_time?: string
+          character_id?: string
+          concentration?: boolean
+          created_at?: string
+          damage_dice?: string
+          description?: string
+          duration?: string
+          id?: string
+          is_hidden?: boolean
+          is_prepared?: boolean
+          level?: number
+          name?: string
+          range?: string
+          sort_order?: number
+        }
         Relationships: [{ foreignKeyName: "spells_character_id_fkey"; columns: ["character_id"]; isOneToOne: false; referencedRelation: "characters"; referencedColumns: ["id"] }]
       }
     }

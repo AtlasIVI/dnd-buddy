@@ -21,5 +21,11 @@ export function emptySpell(characterId: string): Omit<Spell, 'id' | 'created_at'
     is_prepared: false,
     is_hidden: false,
     sort_order: 0,
+    buff_ca: null,
+    buff_hp_temp: null,
+    buff_stat_ability: null,
+    buff_stat_value: null,
+    buff_duration_rounds: null,
+    buff_target_count: 1,
   };
 }
